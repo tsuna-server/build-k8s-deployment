@@ -1,0 +1,16 @@
+---
+- name: "Common roles to deploy servers"
+  hosts: all
+  become: yes
+  roles:
+    - { role: common, tags: ['role_common']}
+
+  environment:
+    OS_USERNAME: "{{ group_vars.openstack.auth.env.OS_USERNAME }}"
+    OS_PASSWORD: "{{ group_vars.openstack.auth.env.OS_PASSWORD }}"
+    OS_PROJECT_NAME: "{{ group_vars.openstack.auth.env.OS_PROJECT_NAME }}"
+    OS_USER_DOMAIN_NAME: "{{ group_vars.openstack.auth.env.OS_USER_DOMAIN_NAME }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ group_vars.openstack.auth.env.OS_PROJECT_DOMAIN_NAME }}"
+    OS_AUTH_URL: "{{ group_vars.openstack.auth.env.OS_AUTH_URL }}"
+    OS_IDENTITY_API_VERSION: "{{ group_vars.openstack.auth.env.OS_IDENTITY_API_VERSION }}"
+
