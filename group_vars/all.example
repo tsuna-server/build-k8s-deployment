@@ -1,1 +1,3 @@
-group_vars: foo
+group_vars:
+  k8s:
+    user: taro

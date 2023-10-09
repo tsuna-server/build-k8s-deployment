@@ -1,0 +1,8 @@
+---
+- name: Include upgrade_packages/main.yml
+  include_tasks: upgrade_packages/main.yml
+
+- name: Include install_packages/k8s/main.yml
+  include_tasks: install_packages/k8s/main.yml
+  when: "'k8s' in group_names"
+
