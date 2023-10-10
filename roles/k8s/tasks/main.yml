@@ -45,14 +45,20 @@
     daemon_reload: yes
     state: restarted
 
-- name: Initialize the Kubernetes cluster using kubeadm
-    command: kubeadm init --apiserver-advertise-address="192.168.255.11" --apiserver-cert-extra-sans="192.168.255.11"  --node-name k8s-master --pod-network-cidr=192.168.255.0/24
+- name: "Block of instructions for k8s-master in group_names"
+  block:
+  - name: Initialize the Kubernetes cluster using kubeadm
+      command: kubeadm init --apiserver-advertise-address="192.168.255.11" --apiserver-cert-extra-sans="192.168.255.11"  --node-name k8s-master --pod-network-cidr=192.168.255.0/24
+
+  - name: Setup kubeconfig for vagrant user
+    command: "{{ item }}"
+    with_items:
+     - mkdir -p /home/sushi7/.kube
+     - cp -i /etc/kubernetes/admin.conf /home/sushi7/.kube/config
+     - chown sushi7:sushi7 /home/sushi7/.kube/config
+
+  - name: Install calico pod network
+    become: false
+    command: kubectl create -f https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
+
   when: '"k8s-master" in group_names'
-
-- name: Setup kubeconfig for vagrant user
-  command: "{{ item }}"
-  with_items:
-   - mkdir -p /home/sushi7/.kube
-   - cp -i /etc/kubernetes/admin.conf /home/sushi7/.kube/config
-   - chown sushi7:sushi7 /home/sushi7/.kube/config
-
