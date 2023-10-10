@@ -4,5 +4,5 @@
 
 - name: Include install_packages/k8s/main.yml
   include_tasks: install_packages/k8s/main.yml
-  when: "'k8s' in group_names"
+  when: "('k8s' in group_names) or ('k8s-master' in group_names)"
 
