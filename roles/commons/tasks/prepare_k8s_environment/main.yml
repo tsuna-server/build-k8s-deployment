@@ -1,2 +1,8 @@
 ---
+- name: "Create a \"/etc/modules-load.d/k8s.conf\" for bridges of IPv4"
+  blockinfile:
+  dest: /etc/modules-load.d/k8s.conf
+  content: |
+    overlay
+    br_netfilter
 
