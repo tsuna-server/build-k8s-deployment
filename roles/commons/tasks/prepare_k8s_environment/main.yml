@@ -16,3 +16,16 @@
     net.ipv4.ip_forward                 = 1
   notify: Run sysctl system
 
+
+- name: One way to avoid apt_key once it is removed from your distro, armored keys should use .asc extension, binary should use .gpg
+  block:
+    - name: somerepo | no apt key
+      ansible.builtin.get_url:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        dest: /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+
+    - name: "Repository \"https://apt.kubernetes.io/ kubernetes-xenial main\""
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-{{ ansible_distribution_release }} main"
+        state: present
+
