@@ -3,7 +3,7 @@
   hosts: all
   become: yes
   roles:
-    - { role: common, tags: ['role_common']}
+    - { role: commons, tags: ['role_commons']}
 
   environment:
     OS_USERNAME: "{{ group_vars.openstack.auth.env.OS_USERNAME }}"
