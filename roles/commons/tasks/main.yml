@@ -1,4 +1,7 @@
 ---
+- name: Include set_apt_cache_proxy/main.yml
+  include_tasks: set_apt_cache_proxy/main.yml
+
 - name: Include upgrade_packages/main.yml
   include_tasks: upgrade_packages/main.yml
 
