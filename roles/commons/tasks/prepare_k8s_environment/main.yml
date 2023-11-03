@@ -16,6 +16,9 @@
       net.ipv4.ip_forward                 = 1
   notify: Run sysctl system
 
+- name: Run notified handler of sysctl
+  meta: flush_handlers
+
 - name: One way to avoid apt_key once it is removed from your distro, armored keys should use .asc extension, binary should use .gpg
   block:
     - name: "Add gpg key for kubernetes from \"https://packages.cloud.google.com/apt/doc/apt-key.gpg\" to \"/etc/apt/keyrings/kubernetes-archive-keyring.gpg\""
