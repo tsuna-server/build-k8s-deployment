@@ -19,68 +19,68 @@
 - name: Run notified handler of sysctl
   meta: flush_handlers
 
-- name: One way to avoid apt_key once it is removed from your distro, armored keys should use .asc extension, binary should use .gpg
-  block:
-    - name: "Add gpg key for kubernetes from \"https://packages.cloud.google.com/apt/doc/apt-key.gpg\" to \"/etc/apt/keyrings/kubernetes-archive-keyring.gpg\""
-      ansible.builtin.apt_key:
-        id: B53DC80D13EDEF05
-        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-        keyring: /etc/apt/keyrings/kubernetes-archive-keyring.gpg
-        state: present
 
-    # When the distribution is jammy, use repository for xenial so far because there are no repository for jammy in https://apt.kubernetes.io/.
-    - name: "Declare k8s_distribution_name for specifying apt_repository"
-      set_fact:
-        k8s_distribution_name: "{% if ansible_distribution_release == 'jammy' %}xenial{% else %}{{ ansible_distribution_release }}{% endif %}"
+- name: "Add gpg key for kubernetes from \"https://packages.cloud.google.com/apt/doc/apt-key.gpg\" to \"/etc/apt/keyrings/kubernetes-archive-keyring.gpg\""
+  ansible.builtin.apt_key:
+    id: B53DC80D13EDEF05
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    keyring: /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+    state: present
 
-    - name: "Repository \"https://apt.kubernetes.io/ kubernetes-{{ k8s_distribution_name }} main\""
-      ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-{{ k8s_distribution_name }} main"
-        state: present
+# When the distribution is jammy, use repository for xenial so far because there are no repository for jammy in https://apt.kubernetes.io/.
+- name: "Declare k8s_distribution_name for specifying apt_repository"
+  set_fact:
+    k8s_distribution_name: "{% if ansible_distribution_release == 'jammy' %}xenial{% else %}{{ ansible_distribution_release }}{% endif %}"
 
-    - name: "Install kubernetes packages"
-      apt:
-        name: ["kubelet", "kubeadm", "kubectl"]
-        state: present
-        update_cache: yes
+- name: "Repository \"https://apt.kubernetes.io/ kubernetes-{{ k8s_distribution_name }} main\""
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-{{ k8s_distribution_name }} main"
+    state: present
 
-    - name: Install docker and its dependecies
-      apt: 
-        name: ["docker.io"]
-        state: present
-        update_cache: yes
+- name: "Install kubernetes packages"
+  apt:
+    name: ["kubelet", "kubeadm", "kubectl"]
+    state: present
+    update_cache: yes
 
-    - name: "Create a directory /etc/containerd/"
-      ansible.builtin.file:
-        path: /etc/containerd
-        state: directory
-        mode: '0755'
+- name: Install docker and its dependecies
+  apt: 
+    name: ["docker.io"]
+    state: present
+    update_cache: yes
 
-    #- name: "Create a file \"/etc/containerd/config.toml\""
-    #  copy:
-    #    dest: /etc/containerd/config.toml
-    #    content: "containerd config default"
-    #    mode: '0644'
-    #  notify: ["Restart containerd", "Restart kubelet"]
+- name: "Create a directory /etc/containerd/"
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+    mode: '0755'
 
-    - name: "Get output of a command \"containerd config default\""
-      shell: "containerd config default"
-      register: output_of_a_command
+#- name: "Create a file \"/etc/containerd/config.toml\""
+#  copy:
+#    dest: /etc/containerd/config.toml
+#    content: "containerd config default"
+#    mode: '0644'
+#  notify: ["Restart containerd", "Restart kubelet"]
 
-    - name: "Create a file \"/etc/containerd/config.toml\" by running a command \"containerd config default > /etc/containerd/config.toml\""
-      copy:
-        dest: /etc/containerd/config.toml
-        content: "{{ output_of_a_command.stdout }}\n"
-      notify: ["Restart containerd", "Restart kubelet"]
+- name: "Get output of a command \"containerd config default\""
+  shell: "containerd config default"
+  register: output_of_a_command
 
-    - name: "Replace a line \"SystemdCgroup\" in /etc/containerd/config.toml"
-      ansible.builtin.lineinfile:
-        path: /etc/containerd/config.toml
-        regexp: '.* SystemdCgroup += +false.*'
-        line: "SystemdCgroup = true"
-      notify: ["Restart containerd", "Restart kubelet"]
+- name: "Create a file \"/etc/containerd/config.toml\" by running a command \"containerd config default > /etc/containerd/config.toml\""
+  copy:
+    dest: /etc/containerd/config.toml
+    content: "{{ output_of_a_command.stdout }}\n"
+  notify: ["Restart containerd", "Restart kubelet"]
 
-    - name: "Enable kubelet"
-      ansible.builtin.service:
-        name: kubelet
-        enabled: yes
+- name: "Replace a line \"SystemdCgroup\" in /etc/containerd/config.toml"
+  ansible.builtin.lineinfile:
+    path: /etc/containerd/config.toml
+    regexp: '.* SystemdCgroup += +false.*'
+    line: "SystemdCgroup = true"
+  notify: ["Restart containerd", "Restart kubelet"]
+
+- name: "Enable kubelet"
+  ansible.builtin.service:
+    name: kubelet
+    enabled: yes
+
