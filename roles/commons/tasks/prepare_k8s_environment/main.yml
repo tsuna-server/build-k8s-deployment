@@ -111,5 +111,17 @@
       ansible.builtin.debug:
         msg: "{{ result.stdout }}"
 
+    - name: "Create a directory \"{{ ansible_env.HOME }}/.kube\" if it does not exist"
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.kube"
+        state: directory
+        mode: '0640'
+
+    - name: "Copy kube config to {{ ansible_env.HOME }}/.kube/config"
+      ansible.builtin.copy:
+        remote_src: true
+        src: "/etc/kubernetes/admin.conf"
+        dest: "{{ ansible_env.HOME }}/.kube/config"
+
   when: "'k8s-master' in group_names"
 
