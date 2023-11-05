@@ -1,4 +1,17 @@
 ---
+- name: "Remove swapfile from /etc/fstab"
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+    - none
+
+- name: "Disable swap with a command \"swapoff -a\""
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
 - name: "Create a \"/etc/modules-load.d/k8s.conf\" for bridges of IPv4"
   ansible.builtin.copy:
     dest: /etc/modules-load.d/k8s.conf
@@ -83,4 +96,9 @@
   ansible.builtin.service:
     name: kubelet
     enabled: yes
+
+- name: "Block of instructions for k8s master nodes"
+  block:
+    - name: "\"kubeadm config images pull\" on master node"
+      shell: "kubeadm config images pull"
 
