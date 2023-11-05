@@ -102,3 +102,14 @@
     - name: "\"kubeadm config images pull\" on master node"
       shell: "kubeadm config images pull"
 
+    - name: "Init k8s cluster"
+      command:
+        argv: ["kubeadm", "init", "--apiserver-advertise-address=192.168.255.11", "--apiserver-cert-extra-sans=192.168.255.11", "--node-name", "k8s-master", "--pod-network-cidr=192.168.255.0/24"]
+      register: result
+
+    - name: "Debug results"
+      ansible.builtin.debug:
+        msg: "{{ result.stdout }}"
+
+  when: "'k8s-master' in group_names"
+
