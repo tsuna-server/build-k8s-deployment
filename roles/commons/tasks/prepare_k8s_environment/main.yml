@@ -126,5 +126,18 @@
         group: root
         mode: '0640'
 
+    - name: "Create Calio network with a manifest \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml\""
+      get_url:
+        url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
+        dest: "{{ ansible_env.HOME }}/tigera-operator.yaml"
+
+    - name: "kubectl create -f tigera-operator.yaml"
+      shell: "kubectl create -f {{ ansible_env.HOME }}/tigera-operator.yaml"
+      register: kubectl_result
+      retries: 360
+      delay: 5
+      timeout: 10
+      until: kubectl_result is success
+
   when: "'k8s-master' in group_names"
 
