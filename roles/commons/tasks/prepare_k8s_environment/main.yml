@@ -122,6 +122,9 @@
         remote_src: true
         src: "/etc/kubernetes/admin.conf"
         dest: "{{ ansible_env.HOME }}/.kube/config"
+        owner: root
+        group: root
+        mode: '0640'
 
   when: "'k8s-master' in group_names"
 
