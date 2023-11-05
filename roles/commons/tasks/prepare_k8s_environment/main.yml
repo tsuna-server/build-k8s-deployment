@@ -102,14 +102,15 @@
     - name: "\"kubeadm config images pull\" on master node"
       shell: "kubeadm config images pull"
 
+    - name: "Check whether k8s cluster has already initialized"
+      ansible.builtin.script: ./check_whether_k8s_cluster_has_already_initialized.sh
+      register: result_of_command
+
     - name: "Init k8s cluster"
       command:
         argv: ["kubeadm", "init", "--apiserver-advertise-address=192.168.255.11", "--apiserver-cert-extra-sans=192.168.255.11", "--node-name", "k8s-master", "--pod-network-cidr=192.168.255.0/24"]
       register: result
-
-    - name: "Debug results"
-      ansible.builtin.debug:
-        msg: "{{ result.stdout }}"
+      when: result_of_command == 0
 
     - name: "Create a directory \"{{ ansible_env.HOME }}/.kube\" if it does not exist"
       ansible.builtin.file:
