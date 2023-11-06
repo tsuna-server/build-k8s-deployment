@@ -153,5 +153,11 @@
       timeout: 10
       until: kubectl_result is success
 
+    - name: "Replace cidr \"192.168.0.0\" to \"10.10.0.0\""
+      lineinfile:
+        path: "custom-resources.yaml"
+        regexp: 'cidr: 192\.168\.0\.0/16'
+        line: 'cidr: 10.10.0.0/16'
+
   when: "'k8s-master' in group_names"
 
