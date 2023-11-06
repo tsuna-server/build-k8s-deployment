@@ -145,5 +145,13 @@
         url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
         dest: "{{ ansible_env.HOME }}/custom-resources.yaml"
 
+    - name: "kubectl create -f costom-resources.yaml"
+      shell: "kubectl create -f {{ ansible_env.HOME }}/costom-resources.yaml"
+      register: kubectl_result
+      retries: 360
+      delay: 5
+      timeout: 10
+      until: kubectl_result is success
+
   when: "'k8s-master' in group_names"
 
