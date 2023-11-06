@@ -127,7 +127,7 @@
         group: root
         mode: '0640'
 
-    - name: "Create Calio network with a manifest \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml\""
+    - name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml\""
       get_url:
         url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
         dest: "{{ ansible_env.HOME }}/tigera-operator.yaml"
@@ -139,6 +139,11 @@
       delay: 5
       timeout: 10
       until: kubectl_result is success
+
+    - name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml\""
+      get_url:
+        url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
+        dest: "{{ ansible_env.HOME }}/custom-resources.yaml"
 
   when: "'k8s-master' in group_names"
 
