@@ -145,19 +145,26 @@
         url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
         dest: "{{ ansible_env.HOME }}/custom-resources.yaml"
 
-    - name: "kubectl create -f costom-resources.yaml"
-      shell: "kubectl create -f {{ ansible_env.HOME }}/costom-resources.yaml"
-      register: kubectl_result
-      retries: 360
-      delay: 5
-      timeout: 10
-      until: kubectl_result is success
-
     - name: "Replace cidr \"192.168.0.0\" to \"10.10.0.0\""
       lineinfile:
         path: "custom-resources.yaml"
         regexp: 'cidr: 192\.168\.0\.0/16'
         line: 'cidr: 10.10.0.0/16'
 
+    - name: "kubectl create -f costom-resources.yaml"
+      shell: "kubectl create -f {{ ansible_env.HOME }}/custom-resources.yaml"
+      register: kubectl_result
+      retries: 360
+      delay: 5
+      timeout: 10
+      until: kubectl_result is success
+
   when: "'k8s-master' in group_names"
+
+#- name: "Block of instructions for k8s nodes"
+#    #- name: "Join a k8s cluster"
+#    #  # TODO: 
+#    #  # kubeadm join 172.31.1.11:6443 --token <token> --discovery-token-ca-cert-hash <hash>
+#
+#  when: "'k8s' in group_names"
 
