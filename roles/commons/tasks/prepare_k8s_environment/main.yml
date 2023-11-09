@@ -16,7 +16,7 @@
       net.ipv4.ip_forward                 = 1
   notify: Run sysctl system
 
-- name: Run notified handler of sysctl
+- name: "Run notified handler of sysctl(Run sysctl system)"
   meta: flush_handlers
 
 
@@ -83,6 +83,10 @@
   ansible.builtin.service:
     name: kubelet
     enabled: yes
+
+# Flush handlers
+- name: "Run notified handler of sysctl(\"Restart containerd\", \"Restart kubelet\")"
+  meta: flush_handlers
 
 - name: "Block of instructions for k8s master nodes"
   block:
