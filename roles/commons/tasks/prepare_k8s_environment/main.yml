@@ -129,7 +129,7 @@
       register: kubectl_result
       retries: 360
       delay: 5
-      timeout: 10
+      timeout: 60
       until: kubectl_result is success
 
     - name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml\""
@@ -143,7 +143,7 @@
         regexp: 'cidr: 192\.168\.0\.0/16'
         line: 'cidr: 10.10.0.0/16'
 
-    - name: "kubectl create -f costom-resources.yaml"
+    - name: "kubectl create -f custom-resources.yaml"
       shell: "kubectl create -f {{ ansible_env.HOME }}/custom-resources.yaml"
       register: kubectl_result
       retries: 360
