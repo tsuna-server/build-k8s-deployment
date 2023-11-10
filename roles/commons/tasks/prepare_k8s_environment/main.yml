@@ -138,10 +138,10 @@
         dest: "{{ ansible_env.HOME }}/custom-resources.yaml"
 
     - name: "Replace cidr \"192.168.0.0\" to \"10.10.0.0\""
-      lineinfile:
-        path: "custom-resources.yaml"
-        regexp: 'cidr: 192\.168\.0\.0/16'
-        line: 'cidr: 10.10.0.0/16'
+      ansible.builtin.replace:
+        path: "{{ ansible_env.HOME }}/custom-resources.yaml"
+        regexp: '^(\s+)cidr: 192\.168\.0\.0/16(.*)$'
+        replace: '\1cidr: 10.10.0.0/16\2'
 
     - name: "kubectl create -f custom-resources.yaml"
       shell: "kubectl create -f {{ ansible_env.HOME }}/custom-resources.yaml"
