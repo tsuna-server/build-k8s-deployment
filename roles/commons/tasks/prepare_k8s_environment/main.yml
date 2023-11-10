@@ -157,17 +157,24 @@
     # # Getting discovery-token-ca-cert-hash
     # openssl x509 -in /etc/kubernetes/pki/ca.crt -noout -pubkey | openssl rsa -pubin -outform DER 2>/dev/null | sha256sum | cut -d' ' -f1
 
+    - name: "Get a token for joining k8s cluster"
+      ansible.builtin.script: ./get_token_for_joining_k8s_cluster.sh
+      register: result
+
     - name: "Save a token for joining k8s cluster to localhost(Ansible orchestrator)"
       local_action:
         module: copy
-        content: "{{ inventory_hostname }}"
-        #dest: .buffer/k8s_joining_token.txt
+        content: "{{ result.stdout }}"
         dest: .k8s_joining_token.txt
+
+    - name: "Get a discovery-token-ca-cert-hash for joining k8s cluster"
+      ansible.builtin.script: ./get_discovery_token_ca_cert_hash.sh
+      register: result
 
     - name: "Save a discovery-token-ca-cert-hash for joining k8s cluster to localhost(Ansible orchestrator)"
       local_action:
         module: copy
-        content: "{{ inventory_hostname }}"
+        content: "{{ result.stdout }}"
         #dest: .buffer/k8s_discovery_token_ca_cert_hash.txt
         dest: .k8s_discovery_token_ca_cert_hash.txt
 
