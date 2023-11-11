@@ -144,7 +144,7 @@
         regexp: '^(\s+)cidr: 192\.168\.0\.0/16(.*)$'
         replace: '\1cidr: 10.10.0.0/16\2'
 
-    - name: "kubectl create -f custom-resources.yaml"
+    - name: "Create Calico network with command \"kubectl create -f custom-resources.yaml\""
       shell: "kubectl create -f {{ ansible_env.HOME }}/custom-resources.yaml"
       register: kubectl_result
       retries: 360
