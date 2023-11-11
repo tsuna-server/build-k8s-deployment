@@ -180,10 +180,29 @@
 
   when: "'k8s-master' in group_names"
 
-#- name: "Block of instructions for k8s nodes"
-#    #- name: "Join a k8s cluster"
-#    #  # TODO: 
-#    #  # kubeadm join 172.31.1.11:6443 --token <token> --discovery-token-ca-cert-hash <hash>
-#
-#  when: "'k8s' in group_names"
+- name: "Block of instructions for k8s member nodes"
+  block:
+    - name: "Look up k8s_joining_token"
+      set_fact:
+        k8s_joining_token: "{{ lookup('ansible.builtin.file', './.k8s_joining_token.txt') }}"
+
+    - name: "Failed if a variable k8s_joining_token has empty"
+      ansible.builtin.fail:
+        msg: "ERROR: A variable \"k8s_joining_token\" has empty. It might also mean that getting k8s_joining_token from k8s master node has failed."
+      when: k8s_joining_token == ""
+
+    - name: "Look up k8s_discovery_token_ca_cert_hash.txt"
+      set_fact:
+        k8s_discovery_token_ca_cert_hash: "{{ lookup('ansible.builtin.file', './.k8s_discovery_token_ca_cert_hash.txt') }}"
+
+    - name: "Failed if a variable k8s_discovery_token_ca_cert_hash has empty"
+      ansible.builtin.fail:
+        msg: "ERROR: A variable \"k8s_discovery_token_ca_cert_hash\" has empty. It might also mean that getting k8s_discovery_token_ca_cert_hash from k8s master node has failed."
+      when: k8s_discovery_token_ca_cert_hash == ""
+
+    #- name: "Debug variables \"k8s_joining_token\" and \"k8s_discovery_token_ca_cert_hash\""
+    #  ansible.builtin.debug:
+    #    msg: "k8s_joining_token={{ k8s_joining_token }}, k8s_discovery_token_ca_cert_hash={{ k8s_discovery_token_ca_cert_hash }}"
+
+  when: "'k8s' in group_names"
 
