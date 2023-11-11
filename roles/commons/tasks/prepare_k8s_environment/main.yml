@@ -204,5 +204,11 @@
     #  ansible.builtin.debug:
     #    msg: "k8s_joining_token={{ k8s_joining_token }}, k8s_discovery_token_ca_cert_hash={{ k8s_discovery_token_ca_cert_hash }}"
 
+    - name: "Run a command \"kubeadm join <master_node_ip:port> --token <token> --discovery-token-ca-cert-hash <hash>\""
+      ansible.builtin.command:
+        argv: ["kubeadm", "join", "192.168.255.11:6443", "--token", "{{ k8s_joining_token }}", "--discovery-token-ca-cert-hash", "sha256:{{ k8s_discovery_token_ca_cert_hash }}"]
+      args:
+        creates: "/root/.kubeadm_join_has_already_done"
+
   when: "'k8s' in group_names"
 
