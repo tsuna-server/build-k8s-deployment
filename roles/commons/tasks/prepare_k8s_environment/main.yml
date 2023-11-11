@@ -133,8 +133,13 @@
       timeout: 60
       until: kubectl_result is success
       args:
-        creates: "/root/.kubectl_create_tigera_operator_yaml_has_already_created"
+        creates: "{{ ansible_env.HOME }}/.kubectl_create_tigera_operator_yaml_has_already_created"
 
+    - name: "Create \"/root/.kubectl_create_tigera_operator_yaml_has_already_created\" if \"kubectl create -f tigera-operator.yaml\" was succeeded."
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.kubectl_create_tigera_operator_yaml_has_already_created"
+        state: touch
+        mode: '0640'
 
     - name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml\""
       get_url:
@@ -154,6 +159,14 @@
       delay: 5
       timeout: 10
       until: kubectl_result is success
+      args:
+        creates: "{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created"
+
+    - name: "Create \"{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created\" if \"kubectl create -f custom-resources.yaml\" was succeeded."
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created"
+        state: touch
+        mode: '0640'
 
     # Weave net
 
@@ -227,6 +240,12 @@
         argv: ["kubeadm", "join", "192.168.255.11:6443", "--token", "{{ k8s_joining_token }}", "--discovery-token-ca-cert-hash", "sha256:{{ k8s_discovery_token_ca_cert_hash }}"]
       args:
         creates: "/root/.kubeadm_join_has_already_done"
+
+    - name: "Create \"/root/.kubeadm_join_has_already_done\" if \"kubeadm join <master_node_ip:port> --token <token> --discovery-token-ca-cert-hash <hash>\" was succeeded"
+      ansible.builtin.file:
+        path: "/root/.kubeadm_join_has_already_done"
+        state: touch
+        mode: '0640'
 
   when: "'k8s' in group_names"
 
