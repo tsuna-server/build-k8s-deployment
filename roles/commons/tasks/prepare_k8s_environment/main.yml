@@ -132,6 +132,9 @@
       delay: 5
       timeout: 60
       until: kubectl_result is success
+      args:
+        creates: "/root/.kubectl_create_tigera_operator_yaml_has_already_created"
+
 
     - name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml\""
       get_url:
