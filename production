@@ -8,7 +8,8 @@ k8s-node03
 k8s-node04
 
 [default:children]
-k8s
+k8s-masters
+k8s-workers
 
 [all:children]
 default
