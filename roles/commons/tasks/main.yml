@@ -5,15 +5,11 @@
 - name: Include upgrade_packages/main.yml
   include_tasks: upgrade_packages/main.yml
 
-- name: "Block of preparing k8s environment"
-  block:
-    - name: Include disable_swap/common/main.yml
-      include_tasks: disable_swap/common/main.yml
+- name: Include disable_swap/common/main.yml
+  include_tasks: disable_swap/common/main.yml
 
-    - name: Include install_packages/k8s/main.yml
-      include_tasks: install_packages/k8s/main.yml
+- name: Include install_packages/k8s/main.yml
+  include_tasks: install_packages/k8s/main.yml
 
-    - name: Include prepare_k8s_environment/main.yml
-      include_tasks: prepare_k8s_environment/main.yml
-  when: "('k8s' in group_names) or ('k8s-master' in group_names)"
-
+- name: Include prepare_k8s_environment/main.yml
+  include_tasks: prepare_k8s_environment/main.yml
