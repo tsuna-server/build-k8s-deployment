@@ -55,13 +55,6 @@
     state: directory
     mode: '0755'
 
-#- name: "Create a file \"/etc/containerd/config.toml\""
-#  copy:
-#    dest: /etc/containerd/config.toml
-#    content: "containerd config default"
-#    mode: '0644'
-#  notify: ["Restart containerd", "Restart kubelet"]
-
 - name: "Get output of a command \"containerd config default\""
   shell: "containerd config default"
   register: output_of_a_command
@@ -168,7 +161,7 @@
         state: touch
         mode: '0640'
 
-    # Weave net
+    # Preparing weave net to be ready to each k8s nodes.
 
     - name: "Download a manifest of Weave daemon set."
       get_url:
