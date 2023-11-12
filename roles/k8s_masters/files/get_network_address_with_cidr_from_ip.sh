@@ -25,7 +25,7 @@ main() {
         return 1
     fi
 
-    echo "${network_address}/${subnet_length}"
+    echo -n "${network_address}/${subnet_length}"
 
     return 0
 }

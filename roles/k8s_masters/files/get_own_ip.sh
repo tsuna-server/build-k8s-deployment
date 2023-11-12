@@ -15,7 +15,7 @@ main() {
         return 1
     fi
 
-    echo "${ip}"
+    echo -n "${ip}"
 
     return 0
 }

@@ -11,14 +11,17 @@
   ansible.builtin.script: ./get_own_ip.sh
   register: result_get_own_ip
 
+- name: "Declare a variable own_ip"
+  ansible.builtin.set_fact:
+    own_ip: "{{ result_get_own_ip.stdout }}"
+
 - name: "Get network address"
   ansible.builtin.script: ./get_network_address_with_cidr_from_ip.sh {{ own_ip }}
   register: result_get_network_address_with_cidr_from_ip
 
-- name: "Declare a variable own_ip"
+- name: "Declare a variable network_address_with_cidr"
   ansible.builtin.set_fact:
-    own_ip: "{{ result_get_own_ip.stdout }}"
-    network_address_with_cidr: "{{ result_get_network_address_from_ip.stdout }}"
+    network_address_with_cidr: "{{ result_get_network_address_with_cidr_from_ip.stdout }}"
 
 - name: "Debug own_ip, network_address"
   ansible.builtin.debug:
