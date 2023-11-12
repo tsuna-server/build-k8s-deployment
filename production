@@ -1,8 +1,8 @@
 # An inventry file for development
-[k8s-master]
+[k8s-masters]
 k8s-node01
 
-[k8s]
+[k8s-workers]
 k8s-node02
 k8s-node03
 k8s-node04
