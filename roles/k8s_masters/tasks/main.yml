@@ -5,6 +5,9 @@
 - name: "Include prepare_calico_network/main.yml"
   include_tasks: prepare_calico_network/main.yml
 
+- name: "Include prepare_weave_daemonset/main.yml"
+  include_tasks: prepare_weave_daemonset/main.yml
+
 # Preparing weave net to be ready to each k8s nodes.
 
 - name: "Download a manifest of Weave daemon set."
