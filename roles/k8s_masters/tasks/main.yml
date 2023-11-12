@@ -2,54 +2,8 @@
 - name: "Include init_k8s_cluster/main.yml"
   include_tasks: init_k8s_cluster/main.yml
 
-- name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml\""
-  get_url:
-    url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
-    dest: "{{ ansible_env.HOME }}/tigera-operator.yaml"
-
-# TODO: This instruction should be checked whether tigera-operator.yaml has already applied.
-- name: "kubectl create -f tigera-operator.yaml"
-  shell: "kubectl create -f {{ ansible_env.HOME }}/tigera-operator.yaml"
-  register: kubectl_result
-  retries: 360
-  delay: 5
-  timeout: 60
-  until: kubectl_result is success
-  args:
-    creates: "{{ ansible_env.HOME }}/.kubectl_create_tigera_operator_yaml_has_already_created"
-
-- name: "Create \"/root/.kubectl_create_tigera_operator_yaml_has_already_created\" if \"kubectl create -f tigera-operator.yaml\" was succeeded."
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.kubectl_create_tigera_operator_yaml_has_already_created"
-    state: touch
-    mode: '0640'
-
-- name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml\""
-  get_url:
-    url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
-    dest: "{{ ansible_env.HOME }}/custom-resources.yaml"
-
-- name: "Replace cidr \"192.168.0.0\" to \"10.10.0.0\""
-  ansible.builtin.replace:
-    path: "{{ ansible_env.HOME }}/custom-resources.yaml"
-    regexp: '^(\s+)cidr: 192\.168\.0\.0/16(.*)$'
-    replace: '\1cidr: 10.10.0.0/16\2'
-
-- name: "Create Calico network with command \"kubectl create -f custom-resources.yaml\""
-  shell: "kubectl create -f {{ ansible_env.HOME }}/custom-resources.yaml"
-  register: kubectl_result
-  retries: 360
-  delay: 5
-  timeout: 10
-  until: kubectl_result is success
-  args:
-    creates: "{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created"
-
-- name: "Create \"{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created\" if \"kubectl create -f custom-resources.yaml\" was succeeded."
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created"
-    state: touch
-    mode: '0640'
+- name: "Include prepare_calico_network/main.yml"
+  include_tasks: prepare_calico_network/main.yml
 
 # Preparing weave net to be ready to each k8s nodes.
 
