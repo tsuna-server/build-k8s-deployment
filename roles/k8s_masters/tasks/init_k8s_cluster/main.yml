@@ -7,18 +7,27 @@
   register: result_of_command
   failed_when: (result_of_command.rc not in [0, 1])
 
-- name: "Get IP address "
+- name: "Get IP address"
   ansible.builtin.script: ./get_own_ip.sh
-  register: result
+  register: result_get_own_ip
+
+- name: "Get network address"
+  ansible.builtin.script: ./get_network_address_with_cidr_from_ip.sh {{ own_ip }}
+  register: result_get_network_address_with_cidr_from_ip
 
 - name: "Declare a variable own_ip"
   ansible.builtin.set_fact:
-    own_ip: "{{ result.stdout }}"
+    own_ip: "{{ result_get_own_ip.stdout }}"
+    network_address_with_cidr: "{{ result_get_network_address_from_ip.stdout }}"
+
+- name: "Debug own_ip, network_address"
+  ansible.builtin.debug:
+    msg: "own_ip={{ own_ip }}, network_address={{ network_address_with_cidr }}"
 
 - name: "Init k8s cluster"
   command:
     #argv: ["kubeadm", "init", "--apiserver-advertise-address=192.168.255.11", "--apiserver-cert-extra-sans=192.168.255.11", "--node-name", "k8s-master", "--pod-network-cidr=192.168.255.0/24"]
-    argv: ["kubeadm", "init", "--apiserver-advertise-address={{ own_ip }}", "--apiserver-cert-extra-sans={{ own_ip }}", "--node-name", "{{ inventory_hostname }}", "--pod-network-cidr=192.168.255.0/24"]
+    argv: ["kubeadm", "init", "--apiserver-advertise-address={{ own_ip }}", "--apiserver-cert-extra-sans={{ own_ip }}", "--node-name", "{{ inventory_hostname }}", "--pod-network-cidr={{ network_address_with_cidr }}"]
   register: result
   when: result_of_command.rc == 0
 
