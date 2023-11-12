@@ -1,0 +1,6 @@
+---
+- name: "Roles to deploy k8s workers"
+  hosts: all
+  become: yes
+  roles:
+    - { role: k8s_workers, tags: ['role_k8s_workers']}

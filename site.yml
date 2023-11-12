@@ -1,2 +1,4 @@
 ---
 - import_playbook: commons.yml
+- import_playbook: k8s_masters.yml
+- import_playbook: k8s_workers.yml
