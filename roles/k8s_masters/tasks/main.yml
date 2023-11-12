@@ -8,43 +8,5 @@
 - name: "Include prepare_weave_daemonset/main.yml"
   include_tasks: prepare_weave_daemonset/main.yml
 
-# Preparing weave net to be ready to each k8s nodes.
-
-- name: "Download a manifest of Weave daemon set."
-  get_url:
-    url: https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
-    dest: "{{ ansible_env.HOME }}/weave-daemonset-k8s.yaml"
-
-- name: "Apply Weave daemonset with a command \"kubectl apply -f {{ ansible_env.HOME }}/weave-daemonset-k8s.yaml\""
-  shell: "kubectl apply -f {{ ansible_env.HOME }}/weave-daemonset-k8s.yaml"
-  register: kubectl_result
-  retries: 360
-  delay: 5
-  timeout: 10
-  until: kubectl_result is success
-
-# # To get token for joining k8s cluster
-# kubeadm token list -o json | jq -r '.token'
-# # Getting discovery-token-ca-cert-hash
-# openssl x509 -in /etc/kubernetes/pki/ca.crt -noout -pubkey | openssl rsa -pubin -outform DER 2>/dev/null | sha256sum | cut -d' ' -f1
-
-- name: "Get a token for joining k8s cluster"
-  ansible.builtin.script: ./get_token_for_joining_k8s_cluster.sh
-  register: result
-
-- name: "Save a token for joining k8s cluster to localhost(Ansible orchestrator)"
-  local_action:
-    module: copy
-    content: "{{ result.stdout }}"
-    dest: .k8s_joining_token.txt
-
-- name: "Get a discovery-token-ca-cert-hash for joining k8s cluster"
-  ansible.builtin.script: ./get_discovery_token_ca_cert_hash.sh
-  register: result
-
-- name: "Save a discovery-token-ca-cert-hash for joining k8s cluster to localhost(Ansible orchestrator)"
-  local_action:
-    module: copy
-    content: "{{ result.stdout }}"
-    dest: .k8s_discovery_token_ca_cert_hash.txt
-
+- name: "Inlcude get_tokens_for_joining_k8s_cluster/main.yml"
+  include_tasks: get_tokens_for_joining_k8s_cluster/main.yml
