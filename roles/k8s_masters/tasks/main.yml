@@ -1,122 +1,119 @@
 ---
-- name: "Block of instructions for k8s master nodes"
-  block:
-    - name: "\"kubeadm config images pull\" on master node"
-      shell: "kubeadm config images pull"
+- name: "\"kubeadm config images pull\" on master node"
+  shell: "kubeadm config images pull"
 
-    - name: "Check whether k8s cluster has already initialized"
-      ansible.builtin.script: ./check_whether_k8s_cluster_has_already_initialized.sh
-      register: result_of_command
-      failed_when: (result_of_command.rc not in [0, 1])
+- name: "Check whether k8s cluster has already initialized"
+  ansible.builtin.script: ./check_whether_k8s_cluster_has_already_initialized.sh
+  register: result_of_command
+  failed_when: (result_of_command.rc not in [0, 1])
 
-    - name: "Init k8s cluster"
-      command:
-        argv: ["kubeadm", "init", "--apiserver-advertise-address=192.168.255.11", "--apiserver-cert-extra-sans=192.168.255.11", "--node-name", "k8s-master", "--pod-network-cidr=192.168.255.0/24"]
-      register: result
-      when: result_of_command.rc == 0
+- name: "Init k8s cluster"
+  command:
+    argv: ["kubeadm", "init", "--apiserver-advertise-address=192.168.255.11", "--apiserver-cert-extra-sans=192.168.255.11", "--node-name", "k8s-master", "--pod-network-cidr=192.168.255.0/24"]
+  register: result
+  when: result_of_command.rc == 0
 
-    - name: "Create a directory \"{{ ansible_env.HOME }}/.kube\" if it does not exist"
-      ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.kube"
-        state: directory
-        mode: '0640'
+- name: "Create a directory \"{{ ansible_env.HOME }}/.kube\" if it does not exist"
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
+    mode: '0640'
 
-    - name: "Copy kube config to {{ ansible_env.HOME }}/.kube/config"
-      ansible.builtin.copy:
-        remote_src: true
-        src: "/etc/kubernetes/admin.conf"
-        dest: "{{ ansible_env.HOME }}/.kube/config"
-        owner: root
-        group: root
-        mode: '0640'
+- name: "Copy kube config to {{ ansible_env.HOME }}/.kube/config"
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/etc/kubernetes/admin.conf"
+    dest: "{{ ansible_env.HOME }}/.kube/config"
+    owner: root
+    group: root
+    mode: '0640'
 
-    - name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml\""
-      get_url:
-        url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
-        dest: "{{ ansible_env.HOME }}/tigera-operator.yaml"
+- name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml\""
+  get_url:
+    url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
+    dest: "{{ ansible_env.HOME }}/tigera-operator.yaml"
 
-    # TODO: This instruction should be checked whether tigera-operator.yaml has already applied.
-    - name: "kubectl create -f tigera-operator.yaml"
-      shell: "kubectl create -f {{ ansible_env.HOME }}/tigera-operator.yaml"
-      register: kubectl_result
-      retries: 360
-      delay: 5
-      timeout: 60
-      until: kubectl_result is success
-      args:
-        creates: "{{ ansible_env.HOME }}/.kubectl_create_tigera_operator_yaml_has_already_created"
+# TODO: This instruction should be checked whether tigera-operator.yaml has already applied.
+- name: "kubectl create -f tigera-operator.yaml"
+  shell: "kubectl create -f {{ ansible_env.HOME }}/tigera-operator.yaml"
+  register: kubectl_result
+  retries: 360
+  delay: 5
+  timeout: 60
+  until: kubectl_result is success
+  args:
+    creates: "{{ ansible_env.HOME }}/.kubectl_create_tigera_operator_yaml_has_already_created"
 
-    - name: "Create \"/root/.kubectl_create_tigera_operator_yaml_has_already_created\" if \"kubectl create -f tigera-operator.yaml\" was succeeded."
-      ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.kubectl_create_tigera_operator_yaml_has_already_created"
-        state: touch
-        mode: '0640'
+- name: "Create \"/root/.kubectl_create_tigera_operator_yaml_has_already_created\" if \"kubectl create -f tigera-operator.yaml\" was succeeded."
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.kubectl_create_tigera_operator_yaml_has_already_created"
+    state: touch
+    mode: '0640'
 
-    - name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml\""
-      get_url:
-        url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
-        dest: "{{ ansible_env.HOME }}/custom-resources.yaml"
+- name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml\""
+  get_url:
+    url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
+    dest: "{{ ansible_env.HOME }}/custom-resources.yaml"
 
-    - name: "Replace cidr \"192.168.0.0\" to \"10.10.0.0\""
-      ansible.builtin.replace:
-        path: "{{ ansible_env.HOME }}/custom-resources.yaml"
-        regexp: '^(\s+)cidr: 192\.168\.0\.0/16(.*)$'
-        replace: '\1cidr: 10.10.0.0/16\2'
+- name: "Replace cidr \"192.168.0.0\" to \"10.10.0.0\""
+  ansible.builtin.replace:
+    path: "{{ ansible_env.HOME }}/custom-resources.yaml"
+    regexp: '^(\s+)cidr: 192\.168\.0\.0/16(.*)$'
+    replace: '\1cidr: 10.10.0.0/16\2'
 
-    - name: "Create Calico network with command \"kubectl create -f custom-resources.yaml\""
-      shell: "kubectl create -f {{ ansible_env.HOME }}/custom-resources.yaml"
-      register: kubectl_result
-      retries: 360
-      delay: 5
-      timeout: 10
-      until: kubectl_result is success
-      args:
-        creates: "{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created"
+- name: "Create Calico network with command \"kubectl create -f custom-resources.yaml\""
+  shell: "kubectl create -f {{ ansible_env.HOME }}/custom-resources.yaml"
+  register: kubectl_result
+  retries: 360
+  delay: 5
+  timeout: 10
+  until: kubectl_result is success
+  args:
+    creates: "{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created"
 
-    - name: "Create \"{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created\" if \"kubectl create -f custom-resources.yaml\" was succeeded."
-      ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created"
-        state: touch
-        mode: '0640'
+- name: "Create \"{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created\" if \"kubectl create -f custom-resources.yaml\" was succeeded."
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created"
+    state: touch
+    mode: '0640'
 
-    # Preparing weave net to be ready to each k8s nodes.
+# Preparing weave net to be ready to each k8s nodes.
 
-    - name: "Download a manifest of Weave daemon set."
-      get_url:
-        url: https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
-        dest: "{{ ansible_env.HOME }}/weave-daemonset-k8s.yaml"
+- name: "Download a manifest of Weave daemon set."
+  get_url:
+    url: https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+    dest: "{{ ansible_env.HOME }}/weave-daemonset-k8s.yaml"
 
-    - name: "Apply Weave daemonset with a command \"kubectl apply -f {{ ansible_env.HOME }}/weave-daemonset-k8s.yaml\""
-      shell: "kubectl apply -f {{ ansible_env.HOME }}/weave-daemonset-k8s.yaml"
-      register: kubectl_result
-      retries: 360
-      delay: 5
-      timeout: 10
-      until: kubectl_result is success
+- name: "Apply Weave daemonset with a command \"kubectl apply -f {{ ansible_env.HOME }}/weave-daemonset-k8s.yaml\""
+  shell: "kubectl apply -f {{ ansible_env.HOME }}/weave-daemonset-k8s.yaml"
+  register: kubectl_result
+  retries: 360
+  delay: 5
+  timeout: 10
+  until: kubectl_result is success
 
-    # # To get token for joining k8s cluster
-    # kubeadm token list -o json | jq -r '.token'
-    # # Getting discovery-token-ca-cert-hash
-    # openssl x509 -in /etc/kubernetes/pki/ca.crt -noout -pubkey | openssl rsa -pubin -outform DER 2>/dev/null | sha256sum | cut -d' ' -f1
+# # To get token for joining k8s cluster
+# kubeadm token list -o json | jq -r '.token'
+# # Getting discovery-token-ca-cert-hash
+# openssl x509 -in /etc/kubernetes/pki/ca.crt -noout -pubkey | openssl rsa -pubin -outform DER 2>/dev/null | sha256sum | cut -d' ' -f1
 
-    - name: "Get a token for joining k8s cluster"
-      ansible.builtin.script: ./get_token_for_joining_k8s_cluster.sh
-      register: result
+- name: "Get a token for joining k8s cluster"
+  ansible.builtin.script: ./get_token_for_joining_k8s_cluster.sh
+  register: result
 
-    - name: "Save a token for joining k8s cluster to localhost(Ansible orchestrator)"
-      local_action:
-        module: copy
-        content: "{{ result.stdout }}"
-        dest: .k8s_joining_token.txt
+- name: "Save a token for joining k8s cluster to localhost(Ansible orchestrator)"
+  local_action:
+    module: copy
+    content: "{{ result.stdout }}"
+    dest: .k8s_joining_token.txt
 
-    - name: "Get a discovery-token-ca-cert-hash for joining k8s cluster"
-      ansible.builtin.script: ./get_discovery_token_ca_cert_hash.sh
-      register: result
+- name: "Get a discovery-token-ca-cert-hash for joining k8s cluster"
+  ansible.builtin.script: ./get_discovery_token_ca_cert_hash.sh
+  register: result
 
-    - name: "Save a discovery-token-ca-cert-hash for joining k8s cluster to localhost(Ansible orchestrator)"
-      local_action:
-        module: copy
-        content: "{{ result.stdout }}"
-        dest: .k8s_discovery_token_ca_cert_hash.txt
+- name: "Save a discovery-token-ca-cert-hash for joining k8s cluster to localhost(Ansible orchestrator)"
+  local_action:
+    module: copy
+    content: "{{ result.stdout }}"
+    dest: .k8s_discovery_token_ca_cert_hash.txt
 
-  when: "'k8s-master' in group_names"
