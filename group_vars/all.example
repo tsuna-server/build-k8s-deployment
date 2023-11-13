@@ -1,3 +1,9 @@
 group_vars:
   k8s:
     user: taro
+    manifests:
+      # Calico is a widely adopted, battle-tested open source networking and network security solution for Kubernetes, virtual machines, and bare-metal workloads.
+      # It will be used to enable network connectivity among pods in a k8s cluster.
+      calico:
+        version: "v3.26.1"
+
