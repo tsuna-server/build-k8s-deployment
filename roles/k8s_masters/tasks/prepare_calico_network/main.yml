@@ -21,9 +21,9 @@
     state: touch
     mode: '0640'
 
-- name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml\""
+- name: "Download a manifest of Calio from \"https://raw.githubusercontent.com/projectcalico/calico/{{ group_vars.k8s.manifests.calico.version }}/manifests/custom-resources.yaml\""
   get_url:
-    url: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
+    url: "https://raw.githubusercontent.com/projectcalico/calico/{{ group_vars.k8s.manifests.calico.version }}/manifests/custom-resources.yaml"
     dest: "{{ ansible_env.HOME }}/custom-resources.yaml"
 
 - name: "Replace cidr \"192.168.0.0\" to \"10.10.0.0\""
