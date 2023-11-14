@@ -6,4 +6,7 @@ group_vars:
       # It will be used to enable network connectivity among pods in a k8s cluster.
       calico:
         version: "v3.26.1"
+    network:
+      # CIDR of network among pods
+      network_address_cidr: "192.168.0.0/16"
 
