@@ -38,7 +38,7 @@
   ansible.builtin.replace:
     path: "{{ ansible_env.HOME }}/custom-resources.yaml"
     regexp: '^(\s+)cidr: 192\.168\.0\.0/16(.*)$'
-    replace: '\1cidr: 10.10.0.0/16\2'
+    replace: "\\1cidr: {{ group_vars.k8s.network.network_address_cidr }}\\2"
 
 - name: "Create Calico network with command \"kubectl create -f custom-resources.yaml\""
   shell: "kubectl create -f {{ ansible_env.HOME }}/custom-resources.yaml"
