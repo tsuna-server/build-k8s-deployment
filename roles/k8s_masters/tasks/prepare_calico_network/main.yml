@@ -30,10 +30,6 @@
   ansible.builtin.set_fact:
     regex_escaped_k8s_pod_network_address_cidr: "{{ group_vars.k8s.network.network_address_cidr | regex_escape() }}"
 
-- name: "Deeeeeeeeebug"
-  ansible.builtin.debug:
-    msg: "regex_escaped_k8s_pod_network_address_cidr = {{ regex_escaped_k8s_pod_network_address_cidr }}"
-
 - name: "Replace cidr \"{{ group_vars.k8s.network.network_address_cidr }}\" to \"10.10.0.0\""
   ansible.builtin.replace:
     path: "{{ ansible_env.HOME }}/custom-resources.yaml"
@@ -55,5 +51,3 @@
     path: "{{ ansible_env.HOME }}/.kubectl_create_custom_resources_yaml_has_already_created"
     state: touch
     mode: '0640'
-
-
