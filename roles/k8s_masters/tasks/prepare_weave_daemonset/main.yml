@@ -3,7 +3,7 @@
 
 - name: "Download a manifest of Weave daemon set."
   get_url:
-    url: https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+    url: "https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml"
     dest: "{{ ansible_env.HOME }}/weave-daemonset-k8s.yaml"
 
 - name: "Apply Weave daemonset with a command \"kubectl apply -f {{ ansible_env.HOME }}/weave-daemonset-k8s.yaml\""
