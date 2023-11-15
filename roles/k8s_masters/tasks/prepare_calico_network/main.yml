@@ -30,7 +30,7 @@
   ansible.builtin.set_fact:
     regex_escaped_k8s_pod_network_address_cidr: "{{ group_vars.k8s.network.network_address_cidr | regex_escape() }}"
 
-- name: "Replace cidr \"{{ group_vars.k8s.network.network_address_cidr }}\" to \"10.10.0.0\""
+- name: "Replace cidr \"{{ 192.168.0.0/16 }}\" to \"{{ group_vars.k8s.network.network_address_cidr }}\""
   ansible.builtin.replace:
     path: "{{ ansible_env.HOME }}/custom-resources.yaml"
     regexp: '^(\s+)cidr: 192\.168\.0\.0/16(.*)$'
